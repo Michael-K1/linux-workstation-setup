@@ -46,14 +46,14 @@ manager was detected, otherwise the installer aborts.
 ### Quick start (curl)
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)"
 ```
 
 With installer arguments (the `--` placeholder is required, it becomes `$0`):
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)" -- -y
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)" -- -n --prompt p10k
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)" -- -y
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)" -- -n --prompt p10k
 ```
 
 `bootstrap.sh` clones the repository to `~/linux-workstation-setup` (override
@@ -81,7 +81,7 @@ checkout).
 ### Manual (git clone)
 
 ```bash
-git clone https://github.com/USERNAME/linux-workstation-setup.git
+git clone https://github.com/Michael-K1/linux-workstation-setup.git
 cd linux-workstation-setup
 chmod +x install.sh
 ./install.sh

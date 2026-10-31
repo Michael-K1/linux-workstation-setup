@@ -3,7 +3,7 @@
 # bootstrap.sh - one-line remote bootstrap for linux-workstation-setup.
 #
 # Recommended usage (keeps stdin on the terminal, so menus work):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)"
 #
 # With installer arguments (note the '--' placeholder for $0):
 #   bash -c "$(curl -fsSL .../bootstrap.sh)" -- -y
@@ -28,7 +28,7 @@
 
 set -Eeuo pipefail
 
-REPO_URL="${LWS_REPO_URL:-https://github.com/USERNAME/linux-workstation-setup.git}"
+REPO_URL="${LWS_REPO_URL:-https://github.com/Michael-K1/linux-workstation-setup.git}"
 TARGET_DIR="${LWS_DIR:-$HOME/linux-workstation-setup}"
 
 info() { printf '[INFO] %s\n' "$*"; }
