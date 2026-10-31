@@ -43,6 +43,43 @@ manager was detected, otherwise the installer aborts.
 
 ## Installation
 
+### Quick start (curl)
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)"
+```
+
+With installer arguments (the `--` placeholder is required, it becomes `$0`):
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)" -- -y
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/USERNAME/linux-workstation-setup/main/bootstrap.sh)" -- -n --prompt p10k
+```
+
+`bootstrap.sh` clones the repository to `~/linux-workstation-setup` (override
+with `LWS_DIR`) and hands off to `./install.sh`, forwarding all arguments -
+the installer needs its `scripts/` and `config/` directories, so it cannot be
+curl-piped on its own. The checkout is kept so you can re-run it, edit
+`settings.conf`, or `git pull` updates later; running the one-liner again
+fast-forwards the existing checkout.
+
+Prefer the `bash -c "$(curl ...)"` form over `curl ... | bash`: it keeps
+stdin attached to your terminal. Piping works too (the script re-attaches
+`/dev/tty` for the menus), but the `bash -c` form is more robust - and as
+with any remote script, feel free to read `bootstrap.sh` before running it.
+
+The checkout can be deleted after installation if you want: the installer
+**copies** files rather than symlinking them, so nothing in the deployed
+environment references the repository. `bootstrap.sh` offers this as a final
+step when it cloned the repo itself during that run (default: keep). In
+unattended runs it never asks - set `LWS_CLEANUP=true` to remove it, or
+`LWS_CLEANUP=false` to suppress the question entirely. A pre-existing
+checkout is never deleted, and neither is anything after a failed install
+(e.g. Bazzite's pending-reboot state, which needs a re-run from the
+checkout).
+
+### Manual (git clone)
+
 ```bash
 git clone https://github.com/USERNAME/linux-workstation-setup.git
 cd linux-workstation-setup
