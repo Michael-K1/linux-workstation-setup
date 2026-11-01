@@ -56,27 +56,29 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-worksta
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)" -- -n --prompt p10k
 ```
 
-`bootstrap.sh` clones the repository to `~/linux-workstation-setup` (override
-with `LWS_DIR`) and hands off to `./install.sh`, forwarding all arguments -
-the installer needs its `scripts/` and `config/` directories, so it cannot be
-curl-piped on its own. The checkout is kept so you can re-run it, edit
-`settings.conf`, or `git pull` updates later; running the one-liner again
-fast-forwards the existing checkout.
+`bootstrap.sh` clones the repository into a **temporary directory**
+(`mktemp -d` under `/tmp`) and hands off to `./install.sh`, forwarding all
+arguments - the installer needs its `scripts/` and `config/` directories, so
+it cannot be curl-piped on its own. After a successful run the temporary
+clone is removed automatically; the installed environment never references
+it (files are **copied**, not symlinked). After a failed run it is kept for
+inspection - and since `/tmp` is cleared on reboot (which also covers
+Bazzite's layering reboot), just re-run the one-liner afterwards.
+
+Prefer a persistent checkout instead - for editing `settings.conf`, hacking
+on the scripts, or re-running offline? Set `LWS_DIR`:
+
+```bash
+LWS_DIR=~/linux-workstation-setup bash -c "$(curl -fsSL https://raw.githubusercontent.com/Michael-K1/linux-workstation-setup/main/bootstrap.sh)"
+```
+
+A persistent checkout is created (or fast-forwarded on re-runs) at that path
+and never deleted automatically.
 
 Prefer the `bash -c "$(curl ...)"` form over `curl ... | bash`: it keeps
 stdin attached to your terminal. Piping works too (the script re-attaches
 `/dev/tty` for the menus), but the `bash -c` form is more robust - and as
 with any remote script, feel free to read `bootstrap.sh` before running it.
-
-The checkout can be deleted after installation if you want: the installer
-**copies** files rather than symlinking them, so nothing in the deployed
-environment references the repository. `bootstrap.sh` offers this as a final
-step when it cloned the repo itself during that run (default: keep). In
-unattended runs it never asks - set `LWS_CLEANUP=true` to remove it, or
-`LWS_CLEANUP=false` to suppress the question entirely. A pre-existing
-checkout is never deleted, and neither is anything after a failed install
-(e.g. Bazzite's pending-reboot state, which needs a re-run from the
-checkout).
 
 ### Manual (git clone)
 
