@@ -29,6 +29,7 @@ p10k_installed() {
 install_starship() {
     if starship_installed; then
         log_success "Starship is already installed."
+        apply_starship_preset
         return 0
     fi
 
@@ -53,7 +54,43 @@ install_starship() {
 
     starship_installed || { log_error "Starship installation finished but the binary was not found."; return 1; }
     log_success "Starship installed."
-    log_info "Configuration file (optional): ~/.config/starship.toml"
+    apply_starship_preset
+}
+
+# apply_starship_preset - apply the preset from $STARSHIP_PRESET via the
+# `starship preset` command. Only runs when no ~/.config/starship.toml
+# exists yet: an existing configuration is always preserved.
+apply_starship_preset() {
+    local preset="${STARSHIP_PRESET:-none}"
+    local config="$HOME/.config/starship.toml"
+    local starship_bin
+
+    if [[ "$preset" == "none" || -z "$preset" ]]; then
+        log_info "No Starship preset configured; using Starship's built-in defaults."
+        return 0
+    fi
+    if [[ -f "$config" ]]; then
+        log_info "Existing ~/.config/starship.toml found; leaving it untouched."
+        return 0
+    fi
+
+    if command_exists starship; then
+        starship_bin="starship"
+    elif [[ -x "$HOME/.local/bin/starship" ]]; then
+        starship_bin="$HOME/.local/bin/starship"
+    else
+        log_warn "Starship binary not found; cannot apply the '${preset}' preset."
+        return 0
+    fi
+
+    mkdir -p "${config%/*}"
+    if "$starship_bin" preset "$preset" -o "$config" 2>/dev/null && [[ -s "$config" ]]; then
+        log_success "Applied Starship preset '${preset}' -> ~/.config/starship.toml"
+    else
+        rm -f "$config"  # don't leave a broken/empty config behind
+        log_warn "Could not apply Starship preset '${preset}' (run 'starship preset --list' for valid names)."
+        log_warn "Continuing with Starship's built-in defaults."
+    fi
 }
 
 install_p10k() {

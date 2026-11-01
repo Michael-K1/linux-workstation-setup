@@ -89,6 +89,44 @@ parse_args() {
     done
 }
 
+# ---------- Settings ----------
+
+# Allowlist of supported settings and their types. Unknown keys and invalid
+# values are rejected before any change is made to the system.
+declare -rA SETTING_SPEC=(
+    [INSTALL_ZSH]="bool"
+    [INSTALL_OH_MY_ZSH]="bool"
+    [SET_DEFAULT_SHELL]="bool"
+    [PROMPT_ENGINE]="enum:starship|p10k|none"
+    [STARSHIP_PRESET]="string"
+    [INSTALL_MESLO_NERD_FONT]="bool"
+    [PLUGIN_AUTOSUGGESTIONS]="bool"
+    [PLUGIN_SYNTAX_HIGHLIGHTING]="bool"
+    [DEPLOY_ZSH_CONFIG]="bool"
+    [INSTALL_DOCKER_ALIASES]="bool"
+    [INSTALL_CLOUD_TOOLS]="bool"
+)
+
+# validate_setting <key> <value> - dies on invalid values.
+validate_setting() {
+    local key=$1 value=$2 spec=${SETTING_SPEC[$key]}
+    case "$spec" in
+        bool)
+            [[ "$value" == true || "$value" == false ]] \
+                || die "Invalid value for ${key}: '${value}' (expected: true | false)"
+            ;;
+        enum:*)
+            local allowed=${spec#enum:}
+            [[ "|${allowed}|" == *"|${value}|"* ]] \
+                || die "Invalid value for ${key}: '${value}' (expected: ${allowed//|/ | })"
+            ;;
+        string)
+            [[ -n "$value" ]] \
+                || die "Invalid value for ${key}: must not be empty (use 'none' to disable)"
+            ;;
+    esac
+}
+
 load_settings() {
     [[ -f "$SETTINGS_FILE" ]] || die "Settings file not found: ${SETTINGS_FILE}"
     # shellcheck source=settings.conf
@@ -96,16 +134,22 @@ load_settings() {
 
     local kv key value
     for kv in ${CLI_OVERRIDES[@]+"${CLI_OVERRIDES[@]}"}; do
-        [[ "$kv" =~ ^[A-Z_][A-Z0-9_]*=.*$ ]] || die "Invalid --set value: '${kv}' (expected KEY=VALUE)"
+        [[ "$kv" == *=* ]] || die "Invalid --set value: '${kv}' (expected KEY=VALUE)"
         key=${kv%%=*}
         value=${kv#*=}
+        [[ -n "${SETTING_SPEC[$key]+x}" ]] \
+            || die "Unknown setting: '${key}'. Supported settings: ${!SETTING_SPEC[*]}"
+        validate_setting "$key" "$value"
         printf -v "$key" '%s' "$value"
     done
 
-    case "${PROMPT_ENGINE:-}" in
-        starship|p10k|none) ;;
-        *) die "Invalid PROMPT_ENGINE: '${PROMPT_ENGINE:-}' (expected: starship | p10k | none)" ;;
-    esac
+    # Validate the effective values, covering settings.conf itself as well.
+    for key in "${!SETTING_SPEC[@]}"; do
+        if [[ -z "${!key:-}" ]]; then
+            die "Setting ${key} is missing from ${SETTINGS_FILE}"
+        fi
+        validate_setting "$key" "${!key}"
+    done
 }
 
 # ---------- Interactive flow ----------

@@ -136,8 +136,8 @@ INSTALL_ZSH=true
 INSTALL_OH_MY_ZSH=true
 SET_DEFAULT_SHELL=true
 PROMPT_ENGINE="starship"        # starship | p10k | none
+STARSHIP_PRESET="tokyo-night"   # any `starship preset --list` name, or none
 INSTALL_MESLO_NERD_FONT=true
-PLUGIN_GIT=true                 # built into Oh My Zsh, always enabled
 PLUGIN_AUTOSUGGESTIONS=true
 PLUGIN_SYNTAX_HIGHLIGHTING=true
 DEPLOY_ZSH_CONFIG=true
@@ -145,7 +145,12 @@ DEPLOY_ZSH_CONFIG=true
 
 These are *defaults*, not mandatory choices: interactive mode presents them as
 the recommended answers, non-interactive mode applies them as-is, and
-`--set KEY=VALUE` overrides either.
+`--set KEY=VALUE` overrides either. Overrides are validated before anything
+is installed: unknown keys, non-`true`/`false` booleans and invalid enum
+values (e.g. `PROMPT_ENGINE`) abort the run with a clear error.
+
+The built-in Oh My Zsh **git plugin is always enabled** by design and has no
+setting - disabling it would break the plugin baseline this setup assumes.
 
 ## Prompt engines
 
@@ -156,6 +161,11 @@ the recommended answers, non-interactive mode applies them as-is, and
 - Installed natively via `pacman` on Arch/CachyOS; everywhere else the
   [official installer](https://starship.rs/) places a user-level binary in
   `~/.local/bin` (no root needed, no layering on Bazzite).
+- The **tokyo-night preset** is applied by default via `starship preset`
+  (no theme file lives in this repo - the preset ships with Starship
+  itself). This only happens when `~/.config/starship.toml` does not exist
+  yet; an existing config is never touched. Pick another preset or disable
+  it with `--set STARSHIP_PRESET=<name|none>` (see `starship preset --list`).
 - Configure via `~/.config/starship.toml`.
 - Activated with `eval "$(starship init zsh)"` in `~/.config/zsh/prompt.zsh`.
 
